@@ -23,20 +23,34 @@ void dfs() {
     hFind = FindFirstFile(L"*", &res);   // найти первый файл
  
     do {
-        count++; // некоторые файлы не считаются??
+         
         _tprintf(TEXT("file #%d is <%s>\n"), count, res.cFileName);
  
-        // if (...) { // если это подпапка
-        // 	здесь будет обход в глубину
-        // }
-        // else {// это файл
-        // size+=res....
-        // }
+       if ((res.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) != 0 
+			&& _tcscmp(res.cFileName, TEXT("..")) != 0 
+			&& _tcscmp(res.cFileName, TEXT(".")) != 0) { // ???? ??? ????????
+				SetCurrentDirectory(res.cFileName);
+				dfs();
+				SetCurrentDirectory(TEXT(".."));
+		}
+        else { // файлы
+
+		     if (tcscmp(res.cFileName, TEXT("..")) != 0 
+			&& _tcscmp(res.cFileName, TEXT(".")) != 0) count++; // некоторые файлы не считаются??
+
+			long long filesize;
+			filesize=res.nFileSizeHigh;
+			filesize = filesize << 32;
+			size+=res.nFileSizeHigh + res.nFileSizeLow;
+			size += filesize;
+        }
     } while (FindNextFile(hFind, &res) != 0);
     FindClose(hFind);
 }
  
 int main(int argc, wchar_t* argv[]) {
+	long long a;
+	a = 1;
     wchar_t s[512];               	// текущая папка
     GetCurrentDirectory(512, s);  	// получить текущую папку
     wprintf(L"Starting in: %s\n", s);
